@@ -89,6 +89,9 @@ def training():
     if "question_index" not in session:
         session["question_index"] = 0
 
+    if "answered" not in session:
+        session["answered"] = False
+
     q = questions[session["question_index"]]
 
     result = None
@@ -97,33 +100,38 @@ def training():
     if request.method == "POST":
         action = request.form.get("action")
 
-        # NEXT QUESTION
+        # 👉 NEXT QUESTION
         if action == "next":
             session["question_index"] += 1
             if session["question_index"] >= len(questions):
                 session["question_index"] = 0
 
+            session["answered"] = False  # 🔥 reset for next question
+
             q = questions[session["question_index"]]
             return render_template("training.html", question=q["q"], score=session["score"])
 
-        # ANSWER
-        answer = request.form.get("answer")
+        # 👉 ANSWER (ONLY IF NOT ANSWERED BEFORE)
+        if not session["answered"]:
+            answer = request.form.get("answer")
 
-        if answer == q["correct"]:
-            session["score"] += 10
-            result = "✅ Correct!"
-        else:
-            session["score"] -= 5
-            result = "❌ Wrong!"
+            if answer == q["correct"]:
+                session["score"] += 10
+                result = "✅ Correct!"
+            else:
+                session["score"] -= 5
+                result = "❌ Wrong!"
 
-        explanation = q["explanation"]
+            explanation = q["explanation"]
+            session["answered"] = True  # 🔥 lock answer
 
     return render_template(
         "training.html",
         question=q["q"],
         result=result,
         explanation=explanation,
-        score=session["score"]
+        score=session["score"],
+        answered=session["answered"]
     )
 
 

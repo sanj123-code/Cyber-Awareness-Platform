@@ -18,8 +18,9 @@ def analyze_url_ai(url):
         prompt = f"Check if this URL is phishing or safe and explain briefly: {url}"
         response = model.generate_content(prompt)
         return response.text
-    except:
-        return None
+    except Exception as e:
+         print(f"Gemini API error: {e}")  # You'll see what's actually failing
+         return None
 
 # ---------------- FALLBACK ----------------
 def rule_based_check(url):

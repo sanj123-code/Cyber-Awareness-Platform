@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Training</title>
+    <title>Cyber Training</title>
+
+    <!-- Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
         body {
@@ -20,7 +23,6 @@
             padding: 40px;
             border-radius: 20px;
             width: 500px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
 
         button {
@@ -29,16 +31,20 @@
             border-radius: 10px;
             border: none;
             background: #38bdf8;
-            cursor: pointer;
             font-weight: bold;
+            cursor: pointer;
         }
 
         button:disabled {
             background: gray;
         }
 
-        h1 {
-            margin-bottom: 20px;
+        .correct {
+            color: #22c55e;
+        }
+
+        .wrong {
+            color: #ef4444;
         }
     </style>
 </head>
@@ -52,14 +58,21 @@
 <p>{{ question }}</p>
 
 <form method="POST">
-    <button name="answer" value="click" {% if answered %}disabled{% endif %}>Click Link</button>
-    <button name="answer" value="ignore" {% if answered %}disabled{% endif %}>Ignore</button>
-    <button name="answer" value="report" {% if answered %}disabled{% endif %}>Report</button>
+    <button name="answer" value="spam" {% if answered %}disabled{% endif %}>🚫 Spam</button>
+    <button name="answer" value="not_spam" {% if answered %}disabled{% endif %}>✅ Not Spam</button>
 </form>
 
+<br>
+
 {% if result %}
-    <h2>{{ result }}</h2>
+    <h2 class="{% if 'Correct' in result %}correct{% else %}wrong{% endif %}">
+        {{ result }}
+    </h2>
+
     <p>{{ explanation }}</p>
+
+    <!-- celebration text -->
+    <h2 id="celebration-text"></h2>
 
     <form method="POST">
         <button name="action" value="next">Next ➡️</button>
@@ -68,13 +81,39 @@
     <br>
 
     <a href="/dashboard">
-        <button>Finish</button>
+        <button>🏁 Finish</button>
     </a>
 {% endif %}
 
-<p>Score: {{ score }}</p>
+<p><b>Score:</b> {{ score }}</p>
 
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const isCorrect = "{{ result }}".includes("Correct");
+
+        if (isCorrect) {
+
+            // Confetti
+            confetti({
+                particleCount: 120,
+                spread: 60,
+                origin: { y: 0.6 }
+            });
+
+            // Messages
+            const messages = ["🎉 Yayyy!", "🥳 Woohoo!", "🔥 Awesome!", "💯 Yahoo!", "👏 Great Job!"];
+            const msg = messages[Math.floor(Math.random() * messages.length)];
+
+            const el = document.getElementById("celebration-text");
+            if (el) {
+                el.innerText = msg;
+            }
+        }
+    });
+</script>
 
 </body>
 </html>

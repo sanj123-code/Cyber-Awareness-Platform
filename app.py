@@ -1,12 +1,12 @@
 from flask import Flask, render_template, request, session, redirect
 import google.generativeai as genai
 import os
+import random
 
 # ---------------- CONFIG ----------------
-api_key = os.getenv("AIzaSyCc48woG70NkfTD9uSWKAxnsrGlS1325FA")
+api_key = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=api_key)
 
-# Use stable model
 model = genai.GenerativeModel("gemini-pro")
 
 app = Flask(__name__)
@@ -21,8 +21,7 @@ def analyze_url_ai(url):
     except:
         return None
 
-
-# ---------------- RULE BASED FALLBACK ----------------
+# ---------------- FALLBACK ----------------
 def rule_based_check(url):
     score = 0
 
@@ -47,7 +46,6 @@ def rule_based_check(url):
     else:
         return "Safe ✅"
 
-
 # ---------------- HOME ----------------
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -65,20 +63,38 @@ def home():
 
     return render_template("index.html", result=result)
 
-
-# ---------------- TRAINING DATA ----------------
+# ---------------- QUESTIONS ----------------
 questions = [
-    {"q": "Email asks to verify bank account urgently.", "correct": "ignore", "explanation": "Banks don’t ask info via email."},
-    {"q": "Caller asks for OTP.", "correct": "ignore", "explanation": "Never share OTP."},
-    {"q": "Lottery message with link.", "correct": "ignore", "explanation": "Likely scam."},
-    {"q": "Email from amaz0n.com.", "correct": "ignore", "explanation": "Fake domain."},
-    {"q": "Free Netflix WhatsApp link.", "correct": "ignore", "explanation": "Common scam."}
-]
 
+# SPAM
+{"q": "Email asks to verify your bank account urgently.", "correct": "spam", "explanation": "Urgency + sensitive info = phishing."},
+{"q": "Message says you won a lottery and must click a link.", "correct": "spam", "explanation": "Unexpected rewards are scams."},
+{"q": "Email from support@amaz0n.com asking login.", "correct": "spam", "explanation": "Fake domain."},
+{"q": "WhatsApp link offering free Netflix.", "correct": "spam", "explanation": "Free offers = phishing."},
+{"q": "Caller asks for OTP.", "correct": "spam", "explanation": "Never share OTP."},
+{"q": "SMS: KYC pending, click immediately.", "correct": "spam", "explanation": "Urgent SMS scams."},
+{"q": "Account will be blocked unless you act now.", "correct": "spam", "explanation": "Fear tactic."},
+{"q": "Unknown number sends suspicious link.", "correct": "spam", "explanation": "Unknown links unsafe."},
+{"q": "Job offer asking for payment.", "correct": "spam", "explanation": "Jobs don’t ask money."},
+{"q": "Instagram DM asking verification.", "correct": "spam", "explanation": "Fake verification scam."},
+
+# NOT SPAM
+{"q": "College email about exam schedule.", "correct": "not_spam", "explanation": "Official communication."},
+{"q": "Bank app notification inside official app.", "correct": "not_spam", "explanation": "Secure source."},
+{"q": "Amazon order confirmation email.", "correct": "not_spam", "explanation": "Expected action."},
+{"q": "Professor message about assignment.", "correct": "not_spam", "explanation": "Known sender."},
+{"q": "OTP after you requested login.", "correct": "not_spam", "explanation": "User initiated."},
+{"q": "Google login alert email.", "correct": "not_spam", "explanation": "Security alert."},
+{"q": "Friend message about meeting.", "correct": "not_spam", "explanation": "Normal conversation."},
+{"q": "Payment receipt email.", "correct": "not_spam", "explanation": "Expected receipt."},
+{"q": "LinkedIn job update.", "correct": "not_spam", "explanation": "Relevant update."},
+{"q": "Food delivery notification.", "correct": "not_spam", "explanation": "Expected service."}
+]
 
 # ---------------- TRAINING ----------------
 @app.route("/training", methods=["GET", "POST"])
 def training():
+
     if "score" not in session:
         session["score"] = 0
 
@@ -88,7 +104,11 @@ def training():
     if "answered" not in session:
         session["answered"] = False
 
-    q = questions[session["question_index"]]
+    # 🔥 shuffle questions once
+    if "shuffled_questions" not in session:
+        session["shuffled_questions"] = random.sample(questions, len(questions))
+
+    q = session["shuffled_questions"][session["question_index"]]
 
     result = None
     explanation = None
@@ -100,12 +120,13 @@ def training():
         if action == "next":
             session["question_index"] += 1
 
-            if session["question_index"] >= len(questions):
+            if session["question_index"] >= len(session["shuffled_questions"]):
+                session.pop("shuffled_questions")  # reshuffle next time
                 session["question_index"] = 0
 
             session["answered"] = False
 
-            q = questions[session["question_index"]]
+            q = session["shuffled_questions"][session["question_index"]]
             return render_template("training.html", question=q["q"], score=session["score"], answered=False)
 
         # ANSWER ONLY ONCE
@@ -131,20 +152,17 @@ def training():
         answered=session["answered"]
     )
 
-
 # ---------------- DASHBOARD ----------------
 @app.route("/dashboard")
 def dashboard():
     score = session.get("score", 0)
     return render_template("dashboard.html", score=score)
 
-
-# ---------------- RESET SESSION ----------------
+# ---------------- RESET ----------------
 @app.route("/reset")
 def reset():
     session.clear()
     return redirect("/")
-
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":

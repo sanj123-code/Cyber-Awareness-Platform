@@ -1,0 +1,30 @@
+<h1>🎯 Cyber Training</h1>
+
+<p>{{ question }}</p>
+
+<form method="POST">
+    <button name="answer" value="click">Click Link</button>
+    <button name="answer" value="ignore">Ignore</button>
+    <button name="answer" value="report">Report</button>
+</form>
+
+<br>
+
+{% if result %}
+    <h2>{{ result }}</h2>
+    <p>{{ explanation }}</p>
+
+    <!-- NEXT BUTTON -->
+    <form method="POST">
+        <button name="action" value="next">Next Question ➡️</button>
+    </form>
+
+    <br>
+
+    <!-- HOME BUTTON -->
+    <a href="/">
+        <button>🏠 Home</button>
+    </a>
+{% endif %}
+
+<p>Score: {{ score }}</p>

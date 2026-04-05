@@ -1,0 +1,13 @@
+<h1>📊 Dashboard</h1>
+
+<p>Your Score: {{ score }}</p>
+
+{% if score >= 30 %}
+<p>🔥 Excellent</p>
+{% elif score >= 10 %}
+<p>👍 Moderate</p>
+{% else %}
+<p>⚠️ Improve</p>
+{% endif %}
+
+<a href="/">Home</a>

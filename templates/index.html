@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cyber Awareness</title>
+    <style>
+        body {
+            background: #0f172a;
+            color: white;
+            text-align: center;
+            font-family: Arial;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 50px;
+        }
+        .card {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 15px;
+            width: 250px;
+        }
+        button {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            background: #38bdf8;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>🔐 Cyber Awareness Platform</h1>
+
+<div class="container">
+
+<div class="card">
+<h2>🔍 Check URL</h2>
+<form method="POST">
+<input name="url" placeholder="Enter URL"><br><br>
+<button>Analyze</button>
+</form>
+<p>{{ result }}</p>
+</div>
+
+<div class="card">
+<h2>🎯 Training</h2>
+<a href="/training"><button>Start</button></a>
+</div>
+
+<div class="card">
+<h2>📊 Dashboard</h2>
+<a href="/dashboard"><button>View</button></a>
+</div>
+
+</div>
+
+</body>
+</html>

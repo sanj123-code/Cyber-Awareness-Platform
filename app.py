@@ -104,11 +104,17 @@ def training():
     if "answered" not in session:
         session["answered"] = False
 
-    # 🔥 shuffle questions once
+    # 🔥 SAFE shuffle init
     if "shuffled_questions" not in session:
         session["shuffled_questions"] = random.sample(questions, len(questions))
 
-    q = session["shuffled_questions"][session["question_index"]]
+    # 🔥 SAFE access
+    shuffled = session.get("shuffled_questions", questions)
+
+    if session["question_index"] >= len(shuffled):
+        session["question_index"] = 0
+
+    q = shuffled[session["question_index"]]
 
     result = None
     explanation = None
@@ -116,20 +122,12 @@ def training():
     if request.method == "POST":
         action = request.form.get("action")
 
-        # NEXT QUESTION
         if action == "next":
             session["question_index"] += 1
-
-            if session["question_index"] >= len(session["shuffled_questions"]):
-                session.pop("shuffled_questions")  # reshuffle next time
-                session["question_index"] = 0
-
             session["answered"] = False
 
-            q = session["shuffled_questions"][session["question_index"]]
-            return render_template("training.html", question=q["q"], score=session["score"], answered=False)
+            return redirect("/training")
 
-        # ANSWER ONLY ONCE
         if not session["answered"]:
             answer = request.form.get("answer")
 

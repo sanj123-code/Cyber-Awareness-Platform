@@ -64,25 +64,29 @@
 
 <br>
 
-{% if result %}
+{% if answered %}
+
     <h2 class="{% if 'Correct' in result %}correct{% else %}wrong{% endif %}">
         {{ result }}
     </h2>
 
     <p>{{ explanation }}</p>
 
-    <!-- celebration text -->
+    <!-- 🎉 Celebration -->
     <h2 id="celebration-text"></h2>
 
+    <!-- NEXT -->
     <form method="POST">
         <button name="action" value="next">Next ➡️</button>
     </form>
 
     <br>
 
+    <!-- FINISH -->
     <a href="/dashboard">
         <button>🏁 Finish</button>
     </a>
+
 {% endif %}
 
 <p><b>Score:</b> {{ score }}</p>

@@ -3,7 +3,7 @@ import google.generativeai as genai
 import os
 
 # ---------------- CONFIG ----------------
-api_key = os.getenv("AIzaSyCtjO6BzsQBG66r59Oiig9rJ-zbe3ZXUyI")
+api_key = os.getenv("AIzaSyCc48woG70NkfTD9uSWKAxnsrGlS1325FA")
 print("API KEY:", api_key)  # 🔥 debug (check in Render logs)
 
 genai.configure(api_key=api_key)

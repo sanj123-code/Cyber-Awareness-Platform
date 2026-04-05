@@ -4,14 +4,12 @@ import os
 
 # ---------------- CONFIG ----------------
 api_key = os.getenv("AIzaSyCtjO6BzsQBG66r59Oiig9rJ-zbe3ZXUyI")
-
-if not api_key:
-    print("⚠️ No API key found")
+print("API KEY:", api_key)  # 🔥 debug (check in Render logs)
 
 genai.configure(api_key=api_key)
 
-# Use stable model
-model = genai.GenerativeModel("gemini-1.5-flash")
+# ✅ Use stable model
+model = genai.GenerativeModel("gemini-pro")
 
 app = Flask(__name__)
 app.secret_key = "secret123"
@@ -24,7 +22,8 @@ def analyze_url_ai(url):
         return response.text
     except Exception as e:
         print("AI ERROR:", e)
-        return None
+        return f"❌ AI ERROR: {str(e)}"
+
 
 # ---------------- RULE BASED FALLBACK ----------------
 def rule_based_check(url):
@@ -51,6 +50,7 @@ def rule_based_check(url):
     else:
         return "Safe ✅"
 
+
 # ---------------- HOME ----------------
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -61,12 +61,15 @@ def home():
 
         ai_result = analyze_url_ai(url)
 
-        if ai_result:
+        # 🔥 If AI gives error → fallback
+        if ai_result and "❌ AI ERROR" not in ai_result:
             result = "🤖 AI Analysis:\n\n" + ai_result
         else:
-            result = "⚠️ AI failed, using fallback:\n\n" + rule_based_check(url)
+            fallback = rule_based_check(url)
+            result = f"⚠️ AI failed, using fallback:\n\n{fallback}"
 
     return render_template("index.html", result=result)
+
 
 # ---------------- TRAINING DATA ----------------
 questions = [
@@ -123,11 +126,13 @@ def training():
         score=session["score"]
     )
 
+
 # ---------------- DASHBOARD ----------------
 @app.route("/dashboard")
 def dashboard():
     score = session.get("score", 0)
     return render_template("dashboard.html", score=score)
+
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":

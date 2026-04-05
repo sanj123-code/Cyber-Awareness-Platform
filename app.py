@@ -95,21 +95,16 @@ questions = [
 @app.route("/training", methods=["GET", "POST"])
 def training():
 
-    if "score" not in session:
-        session["score"] = 0
+    session.setdefault("score", 0)
+    session.setdefault("question_index", 0)
+    session.setdefault("answered", False)
 
-    if "question_index" not in session:
-        session["question_index"] = 0
+    if "shuffled_questions" not in session or not session["shuffled_questions"]:
+        shuffled = questions.copy()
+        random.shuffle(shuffled)
+        session["shuffled_questions"] = shuffled
 
-    if "answered" not in session:
-        session["answered"] = False
-
-    # 🔥 SAFE shuffle init
-    if "shuffled_questions" not in session:
-        session["shuffled_questions"] = random.sample(questions, len(questions))
-
-    # 🔥 SAFE access
-    shuffled = session.get("shuffled_questions", questions)
+    shuffled = session["shuffled_questions"]
 
     if session["question_index"] >= len(shuffled):
         session["question_index"] = 0
@@ -125,31 +120,29 @@ def training():
         if action == "next":
             session["question_index"] += 1
             session["answered"] = False
-
             return redirect("/training")
 
         if not session["answered"]:
             answer = request.form.get("answer")
 
-            if answer == q["correct"]:
+            if answer == q.get("correct"):
                 session["score"] += 10
                 result = "✅ Correct!"
             else:
                 session["score"] -= 5
                 result = "❌ Wrong!"
 
-            explanation = q["explanation"]
+            explanation = q.get("explanation", "")
             session["answered"] = True
 
     return render_template(
         "training.html",
-        question=q["q"],
+        question=q.get("q", ""),
         result=result,
         explanation=explanation,
         score=session["score"],
         answered=session["answered"]
     )
-
 # ---------------- DASHBOARD ----------------
 @app.route("/dashboard")
 def dashboard():

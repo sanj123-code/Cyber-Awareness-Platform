@@ -66,13 +66,12 @@
 
 {% if answered %}
 
-    <h2 class="{% if 'Correct' in result %}correct{% else %}wrong{% endif %}">
+    <h2 class="{% if result and 'Correct' in result %}correct{% else %}wrong{% endif %}">
         {{ result }}
     </h2>
 
     <p>{{ explanation }}</p>
 
-    <!-- 🎉 Celebration -->
     <h2 id="celebration-text"></h2>
 
     <!-- NEXT -->
@@ -96,18 +95,16 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
 
-        const isCorrect = "{{ result }}".includes("Correct");
+        const resultText = "{{ result if result else '' }}";
+        const isCorrect = resultText.includes("Correct");
 
         if (isCorrect) {
-
-            // Confetti
             confetti({
                 particleCount: 120,
                 spread: 60,
                 origin: { y: 0.6 }
             });
 
-            // Messages
             const messages = ["🎉 Yayyy!", "🥳 Woohoo!", "🔥 Awesome!", "💯 Yahoo!", "👏 Great Job!"];
             const msg = messages[Math.floor(Math.random() * messages.length)];
 

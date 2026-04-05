@@ -4,7 +4,7 @@ import os
 import random
 
 # ---------------- CONFIG ----------------
-api_key = os.getenv("AIzaSyCc48woG70NkfTD9uSWKAxnsrGlS1325FA")
+api_key = os.getenv("AIzaSyAIUbZJvt75BWaPbgRnHuiFG1BkFw7Xjt8")
 genai.configure(api_key=api_key)
 
 model = genai.GenerativeModel("gemini-pro")

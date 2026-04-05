@@ -1,3 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Training</title>
+
+    <style>
+        body {
+            background: #0f172a;
+            color: white;
+            font-family: Arial;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        .box {
+            background: #1e293b;
+            padding: 40px;
+            border-radius: 20px;
+            width: 500px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        button {
+            margin: 10px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: none;
+            background: #38bdf8;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:disabled {
+            background: gray;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="box">
+
 <h1>🎯 Cyber Training</h1>
 
 <p>{{ question }}</p>
@@ -7,23 +56,25 @@
     <button name="answer" value="ignore" {% if answered %}disabled{% endif %}>Ignore</button>
     <button name="answer" value="report" {% if answered %}disabled{% endif %}>Report</button>
 </form>
-<br>
 
 {% if result %}
     <h2>{{ result }}</h2>
     <p>{{ explanation }}</p>
 
-    <!-- NEXT BUTTON -->
     <form method="POST">
-        <button name="action" value="next">Next Question ➡️</button>
+        <button name="action" value="next">Next ➡️</button>
     </form>
 
     <br>
 
-    <!-- HOME BUTTON -->
-    <a href="/">
-        <button>🏠 Home</button>
+    <a href="/dashboard">
+        <button>Finish</button>
     </a>
 {% endif %}
 
 <p>Score: {{ score }}</p>
+
+</div>
+
+</body>
+</html>

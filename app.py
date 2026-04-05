@@ -1,14 +1,12 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, redirect
 import google.generativeai as genai
 import os
 
 # ---------------- CONFIG ----------------
 api_key = os.getenv("AIzaSyCc48woG70NkfTD9uSWKAxnsrGlS1325FA")
-print("API KEY:", api_key)  # 🔥 debug (check in Render logs)
-
 genai.configure(api_key=api_key)
 
-# ✅ Use stable model
+# Use stable model
 model = genai.GenerativeModel("gemini-pro")
 
 app = Flask(__name__)
@@ -20,9 +18,8 @@ def analyze_url_ai(url):
         prompt = f"Check if this URL is phishing or safe and explain briefly: {url}"
         response = model.generate_content(prompt)
         return response.text
-    except Exception as e:
-        print("AI ERROR:", e)
-        return f"❌ AI ERROR: {str(e)}"
+    except:
+        return None
 
 
 # ---------------- RULE BASED FALLBACK ----------------
@@ -61,12 +58,10 @@ def home():
 
         ai_result = analyze_url_ai(url)
 
-        # 🔥 If AI gives error → fallback
-        if ai_result and "❌ AI ERROR" not in ai_result:
-            result = "🤖 AI Analysis:\n\n" + ai_result
+        if ai_result:
+            result = "🤖 AI-powered Analysis:\n\n" + ai_result
         else:
-            fallback = rule_based_check(url)
-            result = f"smart detection result:\n\n{fallback}"
+            result = "🧠 Smart Detection Result:\n\n" + rule_based_check(url)
 
     return render_template("index.html", result=result)
 
@@ -79,6 +74,7 @@ questions = [
     {"q": "Email from amaz0n.com.", "correct": "ignore", "explanation": "Fake domain."},
     {"q": "Free Netflix WhatsApp link.", "correct": "ignore", "explanation": "Common scam."}
 ]
+
 
 # ---------------- TRAINING ----------------
 @app.route("/training", methods=["GET", "POST"])
@@ -100,18 +96,19 @@ def training():
     if request.method == "POST":
         action = request.form.get("action")
 
-        # 👉 NEXT QUESTION
+        # NEXT QUESTION
         if action == "next":
             session["question_index"] += 1
+
             if session["question_index"] >= len(questions):
                 session["question_index"] = 0
 
-            session["answered"] = False  # 🔥 reset for next question
+            session["answered"] = False
 
             q = questions[session["question_index"]]
-            return render_template("training.html", question=q["q"], score=session["score"])
+            return render_template("training.html", question=q["q"], score=session["score"], answered=False)
 
-        # 👉 ANSWER (ONLY IF NOT ANSWERED BEFORE)
+        # ANSWER ONLY ONCE
         if not session["answered"]:
             answer = request.form.get("answer")
 
@@ -123,7 +120,7 @@ def training():
                 result = "❌ Wrong!"
 
             explanation = q["explanation"]
-            session["answered"] = True  # 🔥 lock answer
+            session["answered"] = True
 
     return render_template(
         "training.html",
@@ -140,6 +137,13 @@ def training():
 def dashboard():
     score = session.get("score", 0)
     return render_template("dashboard.html", score=score)
+
+
+# ---------------- RESET SESSION ----------------
+@app.route("/reset")
+def reset():
+    session.clear()
+    return redirect("/")
 
 
 # ---------------- RUN ----------------

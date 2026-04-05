@@ -66,7 +66,7 @@ def home():
             result = "🤖 AI Analysis:\n\n" + ai_result
         else:
             fallback = rule_based_check(url)
-            result = f"⚠️ AI failed, using fallback:\n\n{fallback}"
+            result = f"smart detection result:\n\n{fallback}"
 
     return render_template("index.html", result=result)
 
